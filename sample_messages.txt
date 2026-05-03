@@ -1,8 +1,0 @@
-[01.01.2026, 10:00:00] Ich: Hallo!
-[01.01.2026, 10:01:00] Du: Hi there!
-[01.01.2026, 10:02:00] Ich: Look at this image <test.jpg>
-[01.01.2026, 10:03:00] Du: Cool!
-And this is a multi-line message.
-See?
-[02.01.2026, 12:00:00] Ich: New day!
-[02.01.2026, 12:01:00] Du: <doc.pdf>

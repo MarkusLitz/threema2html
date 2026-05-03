@@ -13,6 +13,13 @@ https://github.com/hkramski/threema2html
 3. Unpack the .zip file (without any subfolders) into the folder where this script lives.
 4. `python3 threema2html.py messages-chatname.txt > index.html`
    (See `python3 threema2html.py -h` for more options.)
+
+   For large chats, you can split the output into multiple files by year or month:
+   `python3 threema2html.py --split year messages-chatname.txt`
+   or
+   `python3 threema2html.py --split month messages-chatname.txt`
+   This will automatically generate an `index.html` linking to the split files.
+
    Note: Referenced media files will be automatically copied to the `./media/` folder if they are found in the same directory as the input file.
 6. Adjust `./lib/default.css`.
 

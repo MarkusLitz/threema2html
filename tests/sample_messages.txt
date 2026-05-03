@@ -1,0 +1,11 @@
+[01.01.2025, 10:00:00] Ich: Message in 2025
+[01.12.2025, 10:00:00] Du: Message in Dec 2025
+[01.01.2026, 10:00:00] Ich: Hallo!
+[01.01.2026, 10:01:00] Du: Hi there!
+[01.01.2026, 10:02:00] Ich: Look at this image <test.jpg>
+[01.01.2026, 10:03:00] Du: Cool!
+And this is a multi-line message.
+See?
+[01.02.2026, 12:00:00] Ich: New month!
+[01.02.2026, 12:01:00] Du: <doc.pdf>
+[02.02.2026, 12:00:00] Ich: Another day in Feb

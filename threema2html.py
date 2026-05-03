@@ -78,6 +78,11 @@ def main():
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
     )
+    parser.add_argument(
+        "--split",
+        choices=["year", "month"],
+        help="Split output into multiple files by year or month",
+    )
     parser.add_argument("inputfile", help="Exported Threema messages file (.txt)")
 
     args = parser.parse_args()
@@ -92,12 +97,49 @@ def main():
     pending_msg = False
     onr = 0
 
-    def close_msg_div(date_time_str):
-        print("\t\t\t</p>")
-        print('\t\t\t<p class="timestamp">')
-        print(f"\t\t\t\t{date_time_str}")
-        print("\t\t\t</p>")
-        print("\t\t</div>")
+    created_files = set()
+
+    def close_msg_div(date_time_str, file=sys.stdout):
+        print("\t\t\t</p>", file=file)
+        print('\t\t\t<p class="timestamp">', file=file)
+        print(f"\t\t\t\t{date_time_str}", file=file)
+        print("\t\t\t</p>", file=file)
+        print("\t\t</div>", file=file)
+
+    def get_target_filename(date_str):
+        if not args.split:
+            return None
+        parts = date_str.split(".")
+        day, month, year = parts[0], parts[1], parts[2]
+        if args.split == "year":
+            return f"chat_{year}.html"
+        elif args.split == "month":
+            return f"chat_{year}_{month}.html"
+        return None
+
+    def open_new_file(filename):
+        f = open(filename, "w", encoding="utf-8")
+        print("<!DOCTYPE html>", file=f)
+        print("<html>", file=f)
+        print("<head>", file=f)
+        print(
+            '\t<meta name="generator" content="threema2html.py (migrated from AWK)">',
+            file=f,
+        )
+        print(f"\t<title>{args.title}</title>", file=f)
+        print(
+            f'\t<link rel="stylesheet" type="text/css" href="{args.style_file}">',
+            file=f,
+        )
+        print("</head>", file=f)
+        print("<body>", file=f)
+        return f
+
+    def close_file(f):
+        if f and f is not sys.stdout:
+            print("</body>", file=f)
+            print("</html>", file=f)
+            f.close()
 
     def copy_files(files):
         for filename in files:
@@ -117,17 +159,26 @@ def main():
                 if args.verbose:
                     print(f"File not found: {src_path}", file=sys.stderr)
 
-    # Print file header
-    print("<!DOCTYPE html>")
-    print("<html>")
-    print("<head>")
-    print(
-        '\t<meta name="generator" content="threema2html.py (migrated from AWK)">'
-    )
-    print(f"\t<title>{args.title}</title>")
-    print(f'\t<link rel="stylesheet" type="text/css" href="{args.style_file}">')
-    print("</head>")
-    print("<body>")
+    if not args.split:
+        current_file = sys.stdout
+        current_filename = None
+        print("<!DOCTYPE html>", file=current_file)
+        print("<html>", file=current_file)
+        print("<head>", file=current_file)
+        print(
+            '\t<meta name="generator" content="threema2html.py (migrated from AWK)">',
+            file=current_file,
+        )
+        print(f"\t<title>{args.title}</title>", file=current_file)
+        print(
+            f'\t<link rel="stylesheet" type="text/css" href="{args.style_file}">',
+            file=current_file,
+        )
+        print("</head>", file=current_file)
+        print("<body>", file=current_file)
+    else:
+        current_file = None
+        current_filename = None
 
     current_msg_timestamp = ""
 
@@ -163,15 +214,34 @@ def main():
                         user = "(Unknown)"
                         msg = rest
 
+                    if args.split:
+                        target_filename = get_target_filename(date_str)
+                        if target_filename != current_filename:
+                            if current_file:
+                                if pending_msg:
+                                    close_msg_div(
+                                        current_msg_timestamp, file=current_file
+                                    )
+                                    pending_msg = False
+                                print(
+                                    "\t</div>", file=current_file
+                                )  # Close date div
+                                close_file(current_file)
+
+                            current_file = open_new_file(target_filename)
+                            current_filename = target_filename
+                            old_date = ""  # Reset old_date for new file
+                            created_files.add(target_filename)
+
                     if pending_msg:
-                        close_msg_div(current_msg_timestamp)
+                        close_msg_div(current_msg_timestamp, file=current_file)
 
                     if date_str != old_date:
                         if pending_msg:
-                            print("\t</div>")  # Close previous date div
+                            print("\t</div>", file=current_file)
 
-                        print('\t<div class="date">')
-                        print(f"\t\t<h2>{date_str}</h2>")
+                        print('\t<div class="date">', file=current_file)
+                        print(f"\t\t<h2>{date_str}</h2>", file=current_file)
                         old_date = date_str
 
                     # Start new message
@@ -181,8 +251,12 @@ def main():
                         user_class = f"Ich {args.name}"
                         display_name = args.name
 
-                    print(f'\t\t<div class="{user_class}">')
-                    print(f"\t\t\t<h3>{display_name}</h3>")
+                    print(
+                        f'\t\t<div class="{user_class}">', file=current_file
+                    )
+                    print(
+                        f"\t\t\t<h3>{display_name}</h3>", file=current_file
+                    )
 
                     found_files = []
                     processed_msg = make_links(
@@ -190,8 +264,8 @@ def main():
                     )
                     copy_files(found_files)
 
-                    print('\t\t\t<p class="msg">')
-                    print(f"\t\t\t\t{processed_msg}")
+                    print('\t\t\t<p class="msg">', file=current_file)
+                    print(f"\t\t\t\t{processed_msg}", file=current_file)
 
                     current_msg_timestamp = f"{date_str}, {time_str}"
                     pending_msg = True
@@ -204,17 +278,56 @@ def main():
                             line, args.media_folder, args.width, found_files
                         )
                         copy_files(found_files)
-                        print(f"\t\t\t\t</br>{processed_line}")
+                        print(
+                            f"\t\t\t\t</br>{processed_line}", file=current_file
+                        )
     except FileNotFoundError:
         print(f"Error: File not found: {args.inputfile}", file=sys.stderr)
         sys.exit(1)
 
     if pending_msg:
-        close_msg_div(current_msg_timestamp)
-        print("\t</div>")  # Close date div
+        close_msg_div(current_msg_timestamp, file=current_file)
+        print("\t</div>", file=current_file)  # Close date div
 
-    print("</body>")
-    print("</html>")
+    if not args.split:
+        print("</body>", file=current_file)
+        print("</html>", file=current_file)
+    else:
+        close_file(current_file)
+
+    if args.split and created_files:
+        index_filename = "index.html"
+        try:
+            with open(index_filename, "w", encoding="utf-8") as f:
+                print("<!DOCTYPE html>", file=f)
+                print("<html>", file=f)
+                print("<head>", file=f)
+                print(
+                    '\t<meta name="generator" content="threema2html.py (migrated from AWK)">',
+                    file=f,
+                )
+                print(f"\t<title>{args.title} - Index</title>", file=f)
+                print(
+                    f'\t<link rel="stylesheet" type="text/css" href="{args.style_file}">',
+                    file=f,
+                )
+                print("</head>", file=f)
+                print("<body>", file=f)
+                print('\t<div class="date">', file=f)
+                print(f"\t\t<h2>{args.title}</h2>", file=f)
+                print("\t\t<ul>", file=f)
+                for filename in sorted(list(created_files)):
+                    print(
+                        f'\t\t\t<li><a href="{filename}">{filename}</a></li>',
+                        file=f,
+                    )
+                print("\t\t</ul>", file=f)
+                print("\t</div>", file=f)
+                print("</body>", file=f)
+                print("</html>", file=f)
+            print(f"Created index file: {index_filename}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error creating index file: {e}", file=sys.stderr)
 
     print(f"{onr} output messages.", file=sys.stderr)
 
