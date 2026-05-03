@@ -10,14 +10,10 @@ https://github.com/hkramski/threema2html
 1. For long-running exports, make sure that your smartphone does not go into standby mode during the 
    export process otherwise you may end up with a corrupted .zip file.
 2. Export a chat in Threema (including media files), see https://threema.ch/en/faq/chatexport.
-3. Unpack the .zip file (without any subfolders) into the folder where this .awk script lives.
-4. `gawk -f threema2html.awk messages-chatname.txt > index.html`
-   (See `gawk -f threema2html.awk -- -h` for more options.)
-5. Copy relevant media files:
-    ```
-    grep "href=\"./media/" index.html | cut -d= -f2 | cut -d\" -f2 | cut -d/ -f3 > medialist.txt
-    xargs --arg-file=medialist.txt cp --target-directory=./media/
-    ```
+3. Unpack the .zip file (without any subfolders) into the folder where this script lives.
+4. `python3 threema2html.py messages-chatname.txt > index.html`
+   (See `python3 threema2html.py -h` for more options.)
+   Note: Referenced media files will be automatically copied to the `./media/` folder if they are found in the same directory as the input file.
 6. Adjust `./lib/default.css`.
 
 This script expects German date formats and the user name "Ich" for the exporter.
