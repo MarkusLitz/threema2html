@@ -1522,7 +1522,7 @@ def main(argv=None):
     enable_search = not args.no_search
 
     message_start_pattern = re.compile(
-        r"^\[(\d{2}\.\d{2}\.\d{4}),\s*(\d{2}:\d{2}:\d{2})\]\s*(.*)"
+        r"^\[(\d{1,2}\.\d{1,2}\.\d{4}),\s*(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(.*)"
     )
 
     old_date = ""
@@ -1607,7 +1607,7 @@ def main(argv=None):
         if args.split == "year":
             return f"chat_{year}.html"
         elif args.split == "month":
-            return f"chat_{year}_{month}.html"
+            return f"chat_{year}_{month.zfill(2)}.html"
         return None
 
     def open_new_file(filename):

@@ -166,6 +166,19 @@ class Threema2HtmlTests(unittest.TestCase):
         self.assertIn("\\u003c/script\\u003e", idx_js)
         self.assertFalse(os.path.exists(secret_file))
 
+    def test_flexible_date_and_time_formats(self):
+        inp = self._write_input(
+            "[16.10.2022, 17:48] Anastasia: Hey without seconds\n"
+            "[29.6.2025, 00:02] Ich: Single digit month\n"
+            "[5.6.2025, 9:05] Anastasia: Single digit day, month, and hour\n"
+        )
+        _, err = self._run_main(["--split", "month", inp])
+
+        self.assertIn("3 output messages.", err)
+        self.assertTrue(os.path.exists("chat_2022_10.html"))
+        self.assertTrue(os.path.exists("chat_2025_06.html"))
+        self.assertFalse(os.path.exists("chat_2025_6.html"))
+
     @unittest.skipUnless(shutil.which("node"), "node not installed")
     def test_embedded_javascript_syntax(self):
         for label, script in (
