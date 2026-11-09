@@ -1,14 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="generator" content="threema2html.py (migrated from AWK)">
 	<title>Threema Export</title>
 	<link rel="stylesheet" type="text/css" href="./lib/default.css">
+	<style>
+.t2h-split-nav {
+	margin: 6px 1ex 10px 1ex;
+}
+.t2h-back-link {
+	display: inline-block;
+	padding: 5px 12px;
+	background: rgba(255, 255, 255, 0.92);
+	color: #1f2937;
+	text-decoration: none;
+	border-radius: 999px;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	font-size: 13px;
+	font-weight: 600;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.t2h-back-link:hover {
+	background: #ffffff;
+}
+@media print {
+	.t2h-split-nav { display: none !important; }
+}
+.t2h-search {
+	position: fixed;
+	top: 12px;
+	right: 16px;
+	z-index: 9999;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	font-size: 13px;
+	color: #1f2937;
+}
+.t2h-fab {
+	width: 40px;
+	height: 40px;
+	border-radius: 999px;
+	border: 1px solid rgba(0, 0, 0, 0.16);
+	background: rgba(255, 255, 255, 0.94);
+	color: #1f2937;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+	transition: transform 0.12s ease, background-color 0.12s ease;
+}
+.t2h-fab:hover {
+	background: #ffffff;
+	transform: scale(1.04);
+}
+.t2h-panel {
+	display: none;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding: 7px 10px;
+	border-radius: 14px;
+	border: 1px solid rgba(0, 0, 0, 0.16);
+	background: rgba(255, 255, 255, 0.96);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+	max-width: calc(100vw - 32px);
+}
+.t2h-search.t2h-open .t2h-fab {
+	display: none;
+}
+.t2h-search.t2h-open .t2h-panel {
+	display: flex;
+}
+.t2h-input {
+	width: 210px;
+	max-width: 52vw;
+	padding: 5px 9px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	font-size: 13px;
+	outline: none;
+	background: #ffffff;
+	color: #111827;
+}
+.t2h-input:focus, .t2h-select:focus {
+	border-color: #2563eb;
+	box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+.t2h-select {
+	max-width: 135px;
+	padding: 5px 7px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	font-size: 12px;
+	background: #ffffff;
+	color: #111827;
+	outline: none;
+}
+.t2h-count {
+	min-width: 54px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	font-size: 12px;
+	color: #4b5563;
+	user-select: none;
+}
+.t2h-count.t2h-zero {
+	color: #dc2626;
+	font-weight: 600;
+}
+.t2h-btn {
+	padding: 4px 8px;
+	border-radius: 7px;
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	color: #1f2937;
+	font-size: 12px;
+	cursor: pointer;
+	line-height: 1.3;
+	user-select: none;
+}
+.t2h-btn:hover:not(:disabled) {
+	background: #e2e8f0;
+}
+.t2h-btn:disabled {
+	opacity: 0.42;
+	cursor: default;
+}
+.t2h-btn.t2h-active-toggle {
+	background: #1d4ed8;
+	border-color: #1d4ed8;
+	color: #ffffff;
+	font-weight: 600;
+}
+div.date > div.t2h-active-msg {
+	outline: 2px solid #f59e0b;
+	outline-offset: 2px;
+}
+body.t2h-filtering div.date:not(.t2h-date-hit) {
+	display: none !important;
+}
+body.t2h-filtering div.date > div:not(.t2h-hit) {
+	display: none !important;
+}
+body.t2h-filtering div.date > div.t2h-hit {
+	cursor: pointer;
+}
+mark.t2h-mark {
+	background-color: #fef08a;
+	color: inherit;
+	padding: 0 1px;
+	border-radius: 2px;
+}
+div.t2h-active-msg mark.t2h-mark {
+	background-color: #fb923c;
+	color: #111827;
+}
+::highlight(t2h-match) {
+	background-color: #fef08a;
+	color: #111827;
+}
+::highlight(t2h-active) {
+	background-color: #fb923c;
+	color: #111827;
+}
+@media print {
+	.t2h-search { display: none !important; }
+}
+	</style>
 </head>
 <body>
+	<div class="t2h-split-nav"><a href="index.html" class="t2h-back-link">&larr; Index</a></div>
 	<div class="date">
 		<h2>01.01.2025</h2>
-		<div class="Ich">
+		<div id="m1" class="Ich">
 			<h3>Ich</h3>
 			<p class="msg">
 				Message in 2025
@@ -18,5 +186,753 @@
 			</p>
 		</div>
 	</div>
+<script>
+(function () {
+  "use strict";
+
+  var indexed = false;
+  var dateEls = [];
+  var msgEls = [];
+  var msgBodyEls = [];
+  var msgTsEls = [];
+  var msgDateIdx = [];
+  var msgSenders = [];
+  var msgSearchText = [];
+  var msgIdToIndex = new Map();
+  var senderList = [];
+
+  var matches = [];
+  var activePos = -1;
+  var filterOnly = false;
+  var currentTokens = [];
+  var searchGen = 0;
+
+  var hitMsgIndices = [];
+  var hitDateIndices = [];
+  var prevActiveEl = null;
+
+  var supportsCustomHighlight =
+    typeof CSS !== "undefined" &&
+    CSS.highlights &&
+    typeof Highlight !== "undefined";
+  var visibleMatched = new Set();
+  var rangeCacheGen = -1;
+  var rangeCache = new Map();
+  var markedMsgs = new Set();
+  var observer = null;
+  var rafFilterId = 0;
+
+  function createSearchIcon(size) {
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("width", String(size));
+    svg.setAttribute("height", String(size));
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2.2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    var circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", "11");
+    circle.setAttribute("cy", "11");
+    circle.setAttribute("r", "7");
+    var line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", "20");
+    line.setAttribute("y1", "20");
+    line.setAttribute("x2", "16.2");
+    line.setAttribute("y2", "16.2");
+    svg.appendChild(circle);
+    svg.appendChild(line);
+    return svg;
+  }
+
+  function extractBasename(path) {
+    if (!path) return "";
+    var clean = path.split("#")[0].split("?")[0];
+    var slash = clean.lastIndexOf("/");
+    return slash >= 0 ? clean.slice(slash + 1) : clean;
+  }
+
+  function ensureIndex() {
+    if (indexed) return;
+    indexed = true;
+    var senderSet = new Set();
+    var dates = document.querySelectorAll("div.date");
+    for (var d = 0; d < dates.length; d++) {
+      var dateDiv = dates[d];
+      dateEls.push(dateDiv);
+      var children = dateDiv.children;
+      for (var c = 0; c < children.length; c++) {
+        var el = children[c];
+        if (el.tagName !== "DIV") continue;
+        var h3 = el.querySelector("h3");
+        var msgP = el.querySelector("p.msg");
+        var tsP = el.querySelector("p.timestamp");
+        var sender = h3 ? h3.textContent.trim() : "";
+        if (sender) senderSet.add(sender);
+
+        var mediaNames = "";
+        if (msgP) {
+          var imgs = msgP.querySelectorAll("img[src]");
+          for (var k = 0; k < imgs.length; k++) {
+            mediaNames += " " + extractBasename(imgs[k].getAttribute("src"));
+          }
+          var links = msgP.querySelectorAll("a[href]");
+          for (var m = 0; m < links.length; m++) {
+            mediaNames += " " + extractBasename(links[m].getAttribute("href"));
+          }
+        }
+
+        var idx = msgEls.length;
+        msgEls.push(el);
+        msgBodyEls.push(msgP);
+        msgTsEls.push(tsP);
+        msgDateIdx.push(d);
+        msgSenders.push(sender);
+        if (el.id) msgIdToIndex.set(el.id, idx);
+
+        var bodyText = msgP ? msgP.textContent : "";
+        var tsText = tsP ? tsP.textContent : "";
+        msgSearchText.push((bodyText + mediaNames + "\n" + tsText).toLowerCase());
+      }
+    }
+    senderList = Array.from(senderSet).sort();
+    populateSenderSelect();
+    setupObserver();
+  }
+
+  function parseQuery(raw) {
+    var tokens = [];
+    if (!raw) return tokens;
+    var parts = raw.split('"');
+    for (var i = 0; i < parts.length; i++) {
+      var seg = parts[i].trim().toLowerCase();
+      if (!seg) continue;
+      if (i % 2 === 1) {
+        tokens.push(seg);
+      } else {
+        var words = seg.split(/\s+/);
+        for (var w = 0; w < words.length; w++) {
+          if (words[w]) tokens.push(words[w]);
+        }
+      }
+    }
+    return tokens;
+  }
+
+  function findIntervals(str, tokens) {
+    if (!tokens.length || !str) return null;
+    var lower = str.toLowerCase();
+    if (lower.length !== str.length) return null;
+    var raw = [];
+    for (var t = 0; t < tokens.length; t++) {
+      var tok = tokens[t];
+      if (!tok) continue;
+      var pos = 0;
+      while ((pos = lower.indexOf(tok, pos)) !== -1) {
+        raw.push([pos, pos + tok.length]);
+        pos += tok.length;
+      }
+    }
+    if (!raw.length) return null;
+    raw.sort(function (a, b) {
+      return a[0] - b[0] || b[1] - a[1];
+    });
+    var merged = [raw[0]];
+    for (var i = 1; i < raw.length; i++) {
+      var last = merged[merged.length - 1];
+      if (raw[i][0] <= last[1]) {
+        if (raw[i][1] > last[1]) last[1] = raw[i][1];
+      } else {
+        merged.push(raw[i]);
+      }
+    }
+    return merged;
+  }
+
+  function collectTextNodes(root) {
+    var nodes = [];
+    if (!root) return nodes;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var n;
+    while ((n = walker.nextNode())) {
+      if (n.nodeValue && n.nodeValue.trim()) nodes.push(n);
+    }
+    return nodes;
+  }
+
+  function getMsgRanges(msgIdx) {
+    if (rangeCacheGen !== searchGen) {
+      rangeCache.clear();
+      rangeCacheGen = searchGen;
+    }
+    if (rangeCache.has(msgIdx)) return rangeCache.get(msgIdx);
+    var ranges = [];
+    if (!currentTokens.length) {
+      rangeCache.set(msgIdx, ranges);
+      return ranges;
+    }
+    var roots = [msgBodyEls[msgIdx], msgTsEls[msgIdx]];
+    for (var r = 0; r < roots.length; r++) {
+      var textNodes = collectTextNodes(roots[r]);
+      for (var i = 0; i < textNodes.length; i++) {
+        var node = textNodes[i];
+        var intervals = findIntervals(node.nodeValue, currentTokens);
+        if (!intervals) continue;
+        for (var j = 0; j < intervals.length; j++) {
+          var rng = document.createRange();
+          rng.setStart(node, intervals[j][0]);
+          rng.setEnd(node, intervals[j][1]);
+          ranges.push(rng);
+        }
+      }
+    }
+    rangeCache.set(msgIdx, ranges);
+    return ranges;
+  }
+
+  function clearFallbackMarks() {
+    if (!markedMsgs.size) return;
+    markedMsgs.forEach(function (idx) {
+      var el = msgEls[idx];
+      var marks = el.querySelectorAll("mark.t2h-mark");
+      for (var i = 0; i < marks.length; i++) {
+        var mk = marks[i];
+        var parent = mk.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(mk.textContent), mk);
+          parent.normalize();
+        }
+      }
+    });
+    markedMsgs.clear();
+  }
+
+  function applyFallbackMarksForMsg(msgIdx) {
+    if (markedMsgs.has(msgIdx) || !currentTokens.length) return;
+    var roots = [msgBodyEls[msgIdx], msgTsEls[msgIdx]];
+    var applied = false;
+    for (var r = 0; r < roots.length; r++) {
+      var textNodes = collectTextNodes(roots[r]);
+      for (var i = 0; i < textNodes.length; i++) {
+        var node = textNodes[i];
+        var val = node.nodeValue;
+        var intervals = findIntervals(val, currentTokens);
+        if (!intervals) continue;
+        var frag = document.createDocumentFragment();
+        var cursor = 0;
+        for (var j = 0; j < intervals.length; j++) {
+          var start = intervals[j][0];
+          var end = intervals[j][1];
+          if (start > cursor) {
+            frag.appendChild(document.createTextNode(val.slice(cursor, start)));
+          }
+          var mark = document.createElement("mark");
+          mark.className = "t2h-mark";
+          mark.textContent = val.slice(start, end);
+          frag.appendChild(mark);
+          cursor = end;
+        }
+        if (cursor < val.length) {
+          frag.appendChild(document.createTextNode(val.slice(cursor)));
+        }
+        if (node.parentNode) {
+          node.parentNode.replaceChild(frag, node);
+          applied = true;
+        }
+      }
+    }
+    if (applied) markedMsgs.add(msgIdx);
+  }
+
+  function makeHighlightFromArray(ranges) {
+    var h = new Highlight();
+    for (var i = 0; i < ranges.length; i++) {
+      h.add(ranges[i]);
+    }
+    return h;
+  }
+
+  function updateCustomHighlightsSafe() {
+    var activeMsgIdx = activePos >= 0 && activePos < matches.length ? matches[activePos] : -1;
+    if (!supportsCustomHighlight) {
+      if (!currentTokens.length || !matches.length) {
+        clearFallbackMarks();
+        return;
+      }
+      visibleMatched.forEach(function (idx) {
+        applyFallbackMarksForMsg(idx);
+      });
+      if (activeMsgIdx !== -1) {
+        applyFallbackMarksForMsg(activeMsgIdx);
+      }
+      return;
+    }
+    if (!currentTokens.length || !matches.length) {
+      CSS.highlights.delete("t2h-match");
+      CSS.highlights.delete("t2h-active");
+      return;
+    }
+    var matchH = new Highlight();
+    var hasMatch = false;
+    visibleMatched.forEach(function (idx) {
+      if (idx === activeMsgIdx) return;
+      var r = getMsgRanges(idx);
+      for (var i = 0; i < r.length; i++) {
+        matchH.add(r[i]);
+        hasMatch = true;
+      }
+    });
+    if (hasMatch) {
+      CSS.highlights.set("t2h-match", matchH);
+    } else {
+      CSS.highlights.delete("t2h-match");
+    }
+    if (activeMsgIdx !== -1) {
+      var ar = getMsgRanges(activeMsgIdx);
+      if (ar.length) {
+        CSS.highlights.set("t2h-active", makeHighlightFromArray(ar));
+      } else {
+        CSS.highlights.delete("t2h-active");
+      }
+    } else {
+      CSS.highlights.delete("t2h-active");
+    }
+  }
+
+  function setupObserver() {
+    if (typeof IntersectionObserver === "undefined") return;
+    observer = new IntersectionObserver(
+      function (entries) {
+        var changed = false;
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          var idx = msgIdToIndex.get(entry.target.id);
+          if (idx === undefined) continue;
+          if (entry.isIntersecting) {
+            visibleMatched.add(idx);
+            changed = true;
+          } else if (visibleMatched.delete(idx)) {
+            changed = true;
+          }
+        }
+        if (changed) updateCustomHighlightsSafe();
+      },
+      { rootMargin: "350px 0px" }
+    );
+  }
+
+  function clearHitClasses() {
+    for (var i = 0; i < hitMsgIndices.length; i++) {
+      msgEls[hitMsgIndices[i]].classList.remove("t2h-hit");
+    }
+    for (var d = 0; d < hitDateIndices.length; d++) {
+      dateEls[hitDateIndices[d]].classList.remove("t2h-date-hit");
+    }
+    hitMsgIndices = [];
+    hitDateIndices = [];
+  }
+
+  function applyFilterState(isQueryActive) {
+    if (rafFilterId) cancelAnimationFrame(rafFilterId);
+    rafFilterId = requestAnimationFrame(function () {
+      rafFilterId = 0;
+      clearHitClasses();
+      if (!filterOnly || !isQueryActive) {
+        document.body.classList.remove("t2h-filtering");
+        return;
+      }
+      var dateSeen = new Uint8Array(dateEls.length);
+      for (var i = 0; i < matches.length; i++) {
+        var mIdx = matches[i];
+        msgEls[mIdx].classList.add("t2h-hit");
+        hitMsgIndices.push(mIdx);
+        var dIdx = msgDateIdx[mIdx];
+        if (!dateSeen[dIdx]) {
+          dateSeen[dIdx] = 1;
+          dateEls[dIdx].classList.add("t2h-date-hit");
+          hitDateIndices.push(dIdx);
+        }
+      }
+      document.body.classList.add("t2h-filtering");
+    });
+  }
+
+  // Build UI via safe DOM APIs
+  var container = document.createElement("div");
+  container.className = "t2h-search";
+  container.setAttribute("role", "search");
+
+  var fab = document.createElement("button");
+  fab.type = "button";
+  fab.className = "t2h-fab";
+  fab.title = "Search chat (/ or Ctrl+K)";
+  fab.setAttribute("aria-label", "Search chat");
+  fab.appendChild(createSearchIcon(18));
+
+  var panel = document.createElement("div");
+  panel.className = "t2h-panel";
+
+  var input = document.createElement("input");
+  input.type = "search";
+  input.className = "t2h-input";
+  input.placeholder = "Search messages\u2026";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.setAttribute("aria-label", "Search messages");
+
+  var senderSelect = document.createElement("select");
+  senderSelect.className = "t2h-select";
+  senderSelect.setAttribute("aria-label", "Filter by sender");
+  var allOpt = document.createElement("option");
+  allOpt.value = "";
+  allOpt.textContent = "All senders";
+  senderSelect.appendChild(allOpt);
+
+  var countEl = document.createElement("span");
+  countEl.className = "t2h-count";
+  countEl.textContent = "";
+
+  var prevBtn = document.createElement("button");
+  prevBtn.type = "button";
+  prevBtn.className = "t2h-btn";
+  prevBtn.textContent = "\u2191";
+  prevBtn.title = "Older match (Enter)";
+  prevBtn.disabled = true;
+
+  var nextBtn = document.createElement("button");
+  nextBtn.type = "button";
+  nextBtn.className = "t2h-btn";
+  nextBtn.textContent = "\u2193";
+  nextBtn.title = "Newer match (Shift+Enter)";
+  nextBtn.disabled = true;
+
+  var filterBtn = document.createElement("button");
+  filterBtn.type = "button";
+  filterBtn.className = "t2h-btn";
+  filterBtn.textContent = "Filter";
+  filterBtn.title = "Show only matching messages (toggle off to view active match in context)";
+  filterBtn.setAttribute("aria-pressed", "false");
+
+  var closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "t2h-btn";
+  closeBtn.textContent = "\u2715";
+  closeBtn.title = "Clear and close (Esc)";
+  closeBtn.setAttribute("aria-label", "Close search");
+
+  panel.appendChild(input);
+  panel.appendChild(senderSelect);
+  panel.appendChild(countEl);
+  panel.appendChild(prevBtn);
+  panel.appendChild(nextBtn);
+  panel.appendChild(filterBtn);
+  panel.appendChild(closeBtn);
+
+  container.appendChild(fab);
+  container.appendChild(panel);
+  document.body.appendChild(container);
+
+  function populateSenderSelect() {
+    senderSelect.replaceChildren();
+    var def = document.createElement("option");
+    def.value = "";
+    def.textContent = "All senders";
+    senderSelect.appendChild(def);
+    for (var i = 0; i < senderList.length; i++) {
+      var opt = document.createElement("option");
+      opt.value = senderList[i];
+      opt.textContent = senderList[i];
+      senderSelect.appendChild(opt);
+    }
+  }
+
+  function setActiveMatch(pos, shouldScroll) {
+    if (prevActiveEl) {
+      prevActiveEl.classList.remove("t2h-active-msg");
+      prevActiveEl = null;
+    }
+    if (!matches.length || pos < 0 || pos >= matches.length) {
+      activePos = -1;
+      updateCounterUI(isQueryActiveNow());
+      updateCustomHighlightsSafe();
+      return;
+    }
+    activePos = pos;
+    var el = msgEls[matches[activePos]];
+    el.classList.add("t2h-active-msg");
+    prevActiveEl = el;
+    updateCounterUI(true);
+    updateCustomHighlightsSafe();
+    if (shouldScroll) {
+      el.scrollIntoView({ behavior: "auto", block: "center" });
+    }
+  }
+
+  function isQueryActiveNow() {
+    return currentTokens.length > 0 || senderSelect.value !== "";
+  }
+
+  function updateCounterUI(active) {
+    if (!active) {
+      countEl.textContent = "";
+      countEl.classList.remove("t2h-zero");
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+    if (!matches.length) {
+      countEl.textContent = "0 / 0";
+      countEl.classList.add("t2h-zero");
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+    countEl.classList.remove("t2h-zero");
+    countEl.textContent = String(activePos + 1) + " / " + String(matches.length);
+    var disableNav = matches.length <= 1;
+    prevBtn.disabled = disableNav;
+    nextBtn.disabled = disableNav;
+  }
+
+  function executeSearch(preferredMsgId, scrollOnMatch) {
+    ensureIndex();
+    searchGen++;
+    if (observer) observer.disconnect();
+    visibleMatched.clear();
+    if (!supportsCustomHighlight) clearFallbackMarks();
+
+    currentTokens = parseQuery(input.value);
+    var matchTokens = currentTokens.slice().sort(function (a, b) {
+      return b.length - a.length;
+    });
+    var sender = senderSelect.value;
+    var active = matchTokens.length > 0 || sender !== "";
+
+    matches = [];
+    if (active) {
+      var tLen = matchTokens.length;
+      for (var i = 0; i < msgEls.length; i++) {
+        if (sender && msgSenders[i] !== sender) continue;
+        var hay = msgSearchText[i];
+        var ok = true;
+        for (var t = 0; t < tLen; t++) {
+          if (hay.indexOf(matchTokens[t]) === -1) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) matches.push(i);
+      }
+    }
+
+    if (observer && currentTokens.length > 0) {
+      for (var k = 0; k < matches.length; k++) {
+        observer.observe(msgEls[matches[k]]);
+      }
+    } else if (!observer && currentTokens.length > 0) {
+      var cap = Math.min(matches.length, 200);
+      for (var c = 0; c < cap; c++) visibleMatched.add(matches[c]);
+    }
+
+    applyFilterState(active);
+
+    if (!matches.length) {
+      setActiveMatch(-1, false);
+      return;
+    }
+
+    var targetPos = matches.length - 1; // Newest match first
+    if (preferredMsgId && msgIdToIndex.has(preferredMsgId)) {
+      var targetMsgIdx = msgIdToIndex.get(preferredMsgId);
+      var foundPos = matches.indexOf(targetMsgIdx);
+      if (foundPos !== -1) targetPos = foundPos;
+    }
+    setActiveMatch(targetPos, scrollOnMatch !== false);
+  }
+
+  function openSearch() {
+    ensureIndex();
+    container.classList.add("t2h-open");
+    input.focus();
+    input.select();
+  }
+
+  function closeSearch() {
+    input.value = "";
+    senderSelect.value = "";
+    if (filterOnly) {
+      filterOnly = false;
+      filterBtn.classList.remove("t2h-active-toggle");
+      filterBtn.setAttribute("aria-pressed", "false");
+    }
+    executeSearch(null, false);
+    container.classList.remove("t2h-open");
+    input.blur();
+  }
+
+  function stepOlder() {
+    if (!matches.length) return;
+    var next = activePos <= 0 ? matches.length - 1 : activePos - 1;
+    setActiveMatch(next, true);
+  }
+
+  function stepNewer() {
+    if (!matches.length) return;
+    var next = activePos >= matches.length - 1 ? 0 : activePos + 1;
+    setActiveMatch(next, true);
+  }
+
+  fab.addEventListener("click", openSearch);
+  closeBtn.addEventListener("click", closeSearch);
+  prevBtn.addEventListener("click", stepOlder);
+  nextBtn.addEventListener("click", stepNewer);
+
+  filterBtn.addEventListener("click", function () {
+    ensureIndex();
+    filterOnly = !filterOnly;
+    filterBtn.classList.toggle("t2h-active-toggle", filterOnly);
+    filterBtn.setAttribute("aria-pressed", filterOnly ? "true" : "false");
+    applyFilterState(isQueryActiveNow());
+    if (!filterOnly && prevActiveEl) {
+      requestAnimationFrame(function () {
+        if (prevActiveEl) {
+          prevActiveEl.scrollIntoView({ behavior: "auto", block: "center" });
+        }
+      });
+    }
+  });
+
+  input.addEventListener("input", function () {
+    executeSearch(null, true);
+  });
+
+  senderSelect.addEventListener("change", function () {
+    executeSearch(null, true);
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        stepNewer();
+      } else {
+        stepOlder();
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeSearch();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && container.classList.contains("t2h-open")) {
+      e.preventDefault();
+      closeSearch();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      openSearch();
+      return;
+    }
+    if (
+      e.key === "/" &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      document.activeElement &&
+      document.activeElement.tagName !== "INPUT" &&
+      document.activeElement.tagName !== "TEXTAREA" &&
+      document.activeElement.tagName !== "SELECT" &&
+      !document.activeElement.isContentEditable
+    ) {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+
+  // In Filter mode, clicking a matched message selects it; double-clicking reveals it in full context
+  document.addEventListener("click", function (e) {
+    if (!filterOnly || !matches.length) return;
+    var msgDiv = e.target.closest ? e.target.closest("div.date > div.t2h-hit") : null;
+    if (!msgDiv || !msgDiv.id) return;
+    var mIdx = msgIdToIndex.get(msgDiv.id);
+    if (mIdx === undefined) return;
+    var pos = matches.indexOf(mIdx);
+    if (pos !== -1) setActiveMatch(pos, false);
+  });
+
+  document.addEventListener("dblclick", function (e) {
+    if (!filterOnly || !matches.length) return;
+    var msgDiv = e.target.closest ? e.target.closest("div.date > div.t2h-hit") : null;
+    if (!msgDiv) return;
+    filterOnly = false;
+    filterBtn.classList.remove("t2h-active-toggle");
+    filterBtn.setAttribute("aria-pressed", "false");
+    applyFilterState(isQueryActiveNow());
+    requestAnimationFrame(function () {
+      msgDiv.scrollIntoView({ behavior: "auto", block: "center" });
+    });
+  });
+
+  function applyDeepLinkHash() {
+    var hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+    var raw = hash.slice(1);
+    var parts = raw.split("&");
+    var targetId = "";
+    var qParam = "";
+    var sParam = "";
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split("=");
+      var k = kv[0];
+      var v = kv.slice(1).join("=");
+      if (i === 0 && /^m\d+$/.test(k) && kv.length === 1) {
+        targetId = k;
+      } else if (k === "q") {
+        try {
+          qParam = decodeURIComponent(v);
+        } catch (_) {
+          qParam = v;
+        }
+      } else if (k === "s") {
+        try {
+          sParam = decodeURIComponent(v);
+        } catch (_) {
+          sParam = v;
+        }
+      }
+    }
+    if (qParam || sParam) {
+      ensureIndex();
+      container.classList.add("t2h-open");
+      input.value = qParam;
+      if (sParam && senderList.indexOf(sParam) !== -1) {
+        senderSelect.value = sParam;
+      }
+      executeSearch(targetId || null, true);
+    } else if (targetId) {
+      var targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.classList.add("t2h-active-msg");
+        prevActiveEl = targetEl;
+        targetEl.scrollIntoView({ behavior: "auto", block: "center" });
+      }
+    }
+  }
+
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(function () {
+      ensureIndex();
+    });
+  }
+
+  applyDeepLinkHash();
+  window.addEventListener("hashchange", applyDeepLinkHash);
+})();
+</script>
 </body>
 </html>

@@ -18,10 +18,20 @@ https://github.com/hkramski/threema2html
    `python3 threema2html.py --split year messages-chatname.txt`
    or
    `python3 threema2html.py --split month messages-chatname.txt`
-   This will automatically generate an `index.html` linking to the split files.
+   This will automatically generate an `index.html` (with global cross-file search backed by a lazy-loaded `search_index.js`) linking to the split files.
 
    Note: Referenced media files will be automatically copied to the `./media/` folder if they are found in the same directory as the input file.
-6. Adjust `./lib/default.css`.
+5. Adjust `./lib/default.css`.
+
+Embedded Search
+---------------
+
+Generated HTML pages include a fast, offline-compatible (`file://`) JavaScript search engine by default:
+
+- **Open search**: Click the floating search button in the top-right corner, or press `/` or `Cmd`/`Ctrl`+`K` (`Cmd`/`Ctrl`+`F` remains native browser find).
+- **Smart matching**: Space-separated words match anywhere in a message (AND), `"quotes"` match exact phrases, and a **Sender** dropdown narrows by participant.
+- **Navigation & filtering**: Starts at the most recent match (`Enter` / `↑` steps to older matches, `Shift+Enter` / `↓` steps to newer matches, `Esc` clears and closes). Toggle **Filter** to hide non-matching messages, and toggle it off (or double-click a filtered message) to jump to that message in full conversation context.
+- **Disable search**: Pass `--no-search` (`python3 threema2html.py --no-search messages-chatname.txt > index.html`) for strictly static HTML without JavaScript.
 
 This script expects German date formats and the user name "Ich" for the exporter.
 For languages other than German, you will probably need to adjust some code.

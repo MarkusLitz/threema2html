@@ -1,13 +1,137 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="generator" content="threema2html.py (migrated from AWK)">
 	<title>Threema Export - Index</title>
 	<link rel="stylesheet" type="text/css" href="./lib/default.css">
+	<style>
+#t2h-index-search, #t2h-index-search div {
+	width: auto;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	box-sizing: border-box;
+}
+#t2h-index-search .t2h-idx-box {
+	max-width: 780px;
+	margin: 16px auto;
+	padding: 14px 16px;
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 16px;
+	border: 1px solid rgba(0, 0, 0, 0.14);
+	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+#t2h-index-search .t2h-idx-controls {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+#t2h-index-search .t2h-idx-input {
+	flex: 1 1 240px;
+	padding: 8px 12px;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	font-size: 14px;
+	outline: none;
+}
+#t2h-index-search .t2h-idx-input:focus, #t2h-index-search .t2h-idx-select:focus {
+	border-color: #2563eb;
+	box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+#t2h-index-search .t2h-idx-select {
+	padding: 8px 10px;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	font-size: 13px;
+	background: #ffffff;
+	outline: none;
+}
+#t2h-index-search .t2h-idx-clear {
+	padding: 7px 11px;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	background: #f8fafc;
+	cursor: pointer;
+	font-size: 13px;
+}
+#t2h-index-search .t2h-idx-clear:hover {
+	background: #e2e8f0;
+}
+#t2h-index-search .t2h-idx-status {
+	margin-top: 8px;
+	font-size: 12px;
+	color: #4b5563;
+}
+#t2h-index-search .t2h-idx-results {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+#t2h-index-search .t2h-idx-card {
+	display: block;
+	padding: 10px 12px;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	background: #ffffff;
+	color: #111827;
+	text-decoration: none;
+	transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+#t2h-index-search .t2h-idx-card:hover {
+	border-color: #93c5fd;
+	background: #f8fafc;
+}
+#t2h-index-search .t2h-idx-meta {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 12px;
+	color: #6b7280;
+	margin-bottom: 4px;
+}
+#t2h-index-search .t2h-idx-sender {
+	font-weight: 700;
+	color: #1f2937;
+}
+#t2h-index-search .t2h-idx-snippet {
+	font-size: 13px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+#t2h-index-search .t2h-idx-snippet mark {
+	background-color: #fef08a;
+	color: inherit;
+	padding: 0 1px;
+	border-radius: 2px;
+}
+#t2h-index-search .t2h-idx-more {
+	margin-top: 8px;
+	padding: 8px 14px;
+	border-radius: 10px;
+	border: 1px solid #cbd5e1;
+	background: #f8fafc;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 600;
+	align-self: center;
+}
+#t2h-index-search .t2h-idx-more:hover {
+	background: #e2e8f0;
+}
+	</style>
 </head>
 <body>
 	<div class="date">
 		<h2>Threema Export</h2>
+		<div id="t2h-index-search"></div>
 		<ul>
 			<li><a href="chat_2025_01.html">chat_2025_01.html</a></li>
 			<li><a href="chat_2025_12.html">chat_2025_12.html</a></li>
@@ -15,5 +139,365 @@
 			<li><a href="chat_2026_02.html">chat_2026_02.html</a></li>
 		</ul>
 	</div>
+<script>
+(function () {
+  "use strict";
+
+  var BATCH_SIZE = 100;
+  var SAFE_FILE_RE = /^chat_\d{4}(?:_\d{2})?\.html$/;
+
+  var loading = false;
+  var loaded = false;
+  var loadError = false;
+  var indexData = null;
+  var lowerCorpus = [];
+  var currentMatches = [];
+  var currentTokens = [];
+  var renderedCount = 0;
+
+  var mount = document.getElementById("t2h-index-search");
+  if (!mount) return;
+
+  var box = document.createElement("div");
+  box.className = "t2h-idx-box";
+  box.setAttribute("role", "search");
+
+  var controls = document.createElement("div");
+  controls.className = "t2h-idx-controls";
+
+  var input = document.createElement("input");
+  input.type = "search";
+  input.className = "t2h-idx-input";
+  input.placeholder = "Search across all chat files\u2026 (/ or Ctrl+K)";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+
+  var senderSelect = document.createElement("select");
+  senderSelect.className = "t2h-idx-select";
+  senderSelect.setAttribute("aria-label", "Filter by sender");
+  var defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "All senders";
+  senderSelect.appendChild(defaultOpt);
+
+  var clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "t2h-idx-clear";
+  clearBtn.textContent = "Clear";
+
+  var statusEl = document.createElement("div");
+  statusEl.className = "t2h-idx-status";
+
+  var resultsEl = document.createElement("div");
+  resultsEl.className = "t2h-idx-results";
+
+  controls.appendChild(input);
+  controls.appendChild(senderSelect);
+  controls.appendChild(clearBtn);
+  box.appendChild(controls);
+  box.appendChild(statusEl);
+  box.appendChild(resultsEl);
+  mount.appendChild(box);
+
+  function parseQuery(raw) {
+    var tokens = [];
+    if (!raw) return tokens;
+    var parts = raw.split('"');
+    for (var i = 0; i < parts.length; i++) {
+      var seg = parts[i].trim().toLowerCase();
+      if (!seg) continue;
+      if (i % 2 === 1) {
+        tokens.push(seg);
+      } else {
+        var words = seg.split(/\s+/);
+        for (var w = 0; w < words.length; w++) {
+          if (words[w]) tokens.push(words[w]);
+        }
+      }
+    }
+    return tokens;
+  }
+
+  function findIntervals(str, tokens) {
+    if (!tokens.length || !str) return null;
+    var lower = str.toLowerCase();
+    if (lower.length !== str.length) return null;
+    var raw = [];
+    for (var t = 0; t < tokens.length; t++) {
+      var tok = tokens[t];
+      if (!tok) continue;
+      var pos = 0;
+      while ((pos = lower.indexOf(tok, pos)) !== -1) {
+        raw.push([pos, pos + tok.length]);
+        pos += tok.length;
+      }
+    }
+    if (!raw.length) return null;
+    raw.sort(function (a, b) {
+      return a[0] - b[0] || b[1] - a[1];
+    });
+    var merged = [raw[0]];
+    for (var i = 1; i < raw.length; i++) {
+      var last = merged[merged.length - 1];
+      if (raw[i][0] <= last[1]) {
+        if (raw[i][1] > last[1]) last[1] = raw[i][1];
+      } else {
+        merged.push(raw[i]);
+      }
+    }
+    return merged;
+  }
+
+  function buildHighlightedSnippet(text, tokens) {
+    var frag = document.createDocumentFragment();
+    var display = text.length > 320 ? text.slice(0, 320) + "\u2026" : text;
+    var intervals = findIntervals(display, tokens);
+    if (!intervals) {
+      frag.appendChild(document.createTextNode(display));
+      return frag;
+    }
+    var cursor = 0;
+    for (var i = 0; i < intervals.length; i++) {
+      var start = intervals[i][0];
+      var end = intervals[i][1];
+      if (start > cursor) {
+        frag.appendChild(document.createTextNode(display.slice(cursor, start)));
+      }
+      var mark = document.createElement("mark");
+      mark.textContent = display.slice(start, end);
+      frag.appendChild(mark);
+      cursor = end;
+    }
+    if (cursor < display.length) {
+      frag.appendChild(document.createTextNode(display.slice(cursor)));
+    }
+    return frag;
+  }
+
+  function hydrateIndex() {
+    indexData = window.__THREEMA_SEARCH_INDEX__;
+    if (!indexData || !Array.isArray(indexData.messages)) {
+      loadError = true;
+      statusEl.textContent = "Search index unavailable.";
+      return;
+    }
+    loaded = true;
+    loading = false;
+    var msgs = indexData.messages;
+    lowerCorpus = new Array(msgs.length);
+    for (var i = 0; i < msgs.length; i++) {
+      lowerCorpus[i] = (msgs[i][4] + "\n" + msgs[i][3]).toLowerCase();
+    }
+    var senders = indexData.senders || [];
+    var sortedSenders = senders.slice().sort();
+    senderSelect.replaceChildren();
+    var allOpt = document.createElement("option");
+    allOpt.value = "";
+    allOpt.textContent = "All senders";
+    senderSelect.appendChild(allOpt);
+    for (var s = 0; s < sortedSenders.length; s++) {
+      var opt = document.createElement("option");
+      opt.value = sortedSenders[s];
+      opt.textContent = sortedSenders[s];
+      senderSelect.appendChild(opt);
+    }
+    runGlobalSearch();
+  }
+
+  function ensureIndexLoaded() {
+    if (loaded || loading || loadError) return;
+    if (window.__THREEMA_SEARCH_INDEX__) {
+      hydrateIndex();
+      return;
+    }
+    loading = true;
+    statusEl.textContent = "Loading search index\u2026";
+    var script = document.createElement("script");
+    script.src = "search_index.js";
+    script.onload = hydrateIndex;
+    script.onerror = function () {
+      loading = false;
+      loadError = true;
+      statusEl.textContent = "Could not load search_index.js.";
+    };
+    document.head.appendChild(script);
+  }
+
+  function renderMoreResults() {
+    var existingMore = resultsEl.querySelector(".t2h-idx-more");
+    if (existingMore) existingMore.remove();
+
+    var msgs = indexData.messages;
+    var files = indexData.files;
+    var senders = indexData.senders;
+    var rawQuery = input.value.trim();
+    var selectedSender = senderSelect.value;
+
+    var limit = Math.min(currentMatches.length, renderedCount + BATCH_SIZE);
+    var frag = document.createDocumentFragment();
+
+    for (var i = renderedCount; i < limit; i++) {
+      var rec = msgs[currentMatches[i]];
+      var file = files[rec[0]] || "";
+      if (!SAFE_FILE_RE.test(file)) continue;
+      var msgNum = rec[1];
+      var senderName = senders[rec[2]] || "";
+      var ts = rec[3] || "";
+      var text = rec[4] || "";
+
+      var hash = "#m" + String(msgNum);
+      if (rawQuery) hash += "&q=" + encodeURIComponent(rawQuery);
+      if (selectedSender) hash += "&s=" + encodeURIComponent(selectedSender);
+
+      var card = document.createElement("a");
+      card.className = "t2h-idx-card";
+      card.href = file + hash;
+
+      var meta = document.createElement("div");
+      meta.className = "t2h-idx-meta";
+
+      var senderSpan = document.createElement("span");
+      senderSpan.className = "t2h-idx-sender";
+      senderSpan.textContent = senderName;
+
+      var rightMeta = document.createElement("span");
+      rightMeta.textContent = ts + " \u00b7 " + file;
+
+      meta.appendChild(senderSpan);
+      meta.appendChild(rightMeta);
+
+      var snippet = document.createElement("div");
+      snippet.className = "t2h-idx-snippet";
+      snippet.appendChild(buildHighlightedSnippet(text, currentTokens));
+
+      card.appendChild(meta);
+      card.appendChild(snippet);
+      frag.appendChild(card);
+    }
+
+    renderedCount = limit;
+    resultsEl.appendChild(frag);
+
+    if (renderedCount < currentMatches.length) {
+      var moreBtn = document.createElement("button");
+      moreBtn.type = "button";
+      moreBtn.className = "t2h-idx-more";
+      moreBtn.textContent =
+        "Show more (" + String(currentMatches.length - renderedCount) + " remaining)";
+      moreBtn.addEventListener("click", renderMoreResults);
+      resultsEl.appendChild(moreBtn);
+    }
+  }
+
+  function runGlobalSearch() {
+    if (!loaded) {
+      if (input.value.trim() || senderSelect.value) ensureIndexLoaded();
+      return;
+    }
+    resultsEl.replaceChildren();
+    currentMatches = [];
+    renderedCount = 0;
+
+    currentTokens = parseQuery(input.value);
+    var matchTokens = currentTokens.slice().sort(function (a, b) {
+      return b.length - a.length;
+    });
+    var selectedSender = senderSelect.value;
+    if (!matchTokens.length && !selectedSender) {
+      statusEl.textContent = "";
+      return;
+    }
+
+    var senderFilterIdx = -1;
+    if (selectedSender) {
+      senderFilterIdx = indexData.senders.indexOf(selectedSender);
+      if (senderFilterIdx === -1) {
+        statusEl.textContent = "0 matches.";
+        return;
+      }
+    }
+
+    var msgs = indexData.messages;
+    var tLen = matchTokens.length;
+    var matchedFiles = new Set();
+
+    // Scan newest-first
+    for (var i = msgs.length - 1; i >= 0; i--) {
+      if (senderFilterIdx !== -1 && msgs[i][2] !== senderFilterIdx) continue;
+      var hay = lowerCorpus[i];
+      var ok = true;
+      for (var t = 0; t < tLen; t++) {
+        if (hay.indexOf(matchTokens[t]) === -1) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        currentMatches.push(i);
+        matchedFiles.add(msgs[i][0]);
+      }
+    }
+
+    if (!currentMatches.length) {
+      statusEl.textContent = "No matching messages found.";
+      return;
+    }
+
+    statusEl.textContent =
+      String(currentMatches.length) +
+      (currentMatches.length === 1 ? " match" : " matches") +
+      " across " +
+      String(matchedFiles.size) +
+      (matchedFiles.size === 1 ? " file" : " files");
+    renderMoreResults();
+  }
+
+  input.addEventListener("focus", ensureIndexLoaded);
+  senderSelect.addEventListener("focus", ensureIndexLoaded);
+  input.addEventListener("input", runGlobalSearch);
+  senderSelect.addEventListener("change", runGlobalSearch);
+
+  clearBtn.addEventListener("click", function () {
+    input.value = "";
+    senderSelect.value = "";
+    resultsEl.replaceChildren();
+    statusEl.textContent = "";
+    input.focus();
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      input.value = "";
+      senderSelect.value = "";
+      resultsEl.replaceChildren();
+      statusEl.textContent = "";
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      ensureIndexLoaded();
+      input.focus();
+      input.select();
+    } else if (
+      e.key === "/" &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      document.activeElement &&
+      document.activeElement.tagName !== "INPUT" &&
+      document.activeElement.tagName !== "TEXTAREA" &&
+      document.activeElement.tagName !== "SELECT"
+    ) {
+      e.preventDefault();
+      ensureIndexLoaded();
+      input.focus();
+      input.select();
+    }
+  });
+})();
+</script>
 </body>
 </html>
